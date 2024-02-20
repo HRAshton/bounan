@@ -38,7 +38,7 @@ export class CopyingService {
 
         const ffmpeg = this.runFfmpeg();
         await semiConcurrentProcess(
-            videoUrls, // .slice(0, 10), // TODO: remove slice
+            videoUrls,
             async (url: string) => await this.downloadVideoPart(url),
             (part: ArrayBuffer) => this.processVideoPart(part, ffmpeg.stdin),
             Configuration.downloading.maxConcurrentDownloads,

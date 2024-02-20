@@ -8,6 +8,4 @@ to Telegram and returns the file id.
 Todo:
 - Fetch session code from url
 - Store session code in table
-- Upload file
-- Receive request
-- Send file id
+- Store logs

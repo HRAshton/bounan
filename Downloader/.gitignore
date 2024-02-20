@@ -5,7 +5,8 @@ dist/
 node_modules/
 
 # Project files:
-*.sublime-*
 tmp/
 !tmp/.gitkeep
-downloader/src/apis/loan-api-client.ts
+src/apis/loan-api-client.ts
+session.txt
+last-message-id.txt
