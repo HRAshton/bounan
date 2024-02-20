@@ -1,0 +1,11 @@
+# Generated directories:
+.nyc_output/
+coverage/
+dist/
+node_modules/
+
+# Project files:
+*.sublime-*
+tmp/
+!tmp/.gitkeep
+downloader/src/apis/loan-api-client.ts
