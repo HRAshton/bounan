@@ -1,19 +1,15 @@
 {
-  "name": "",
-  "version": "0",
-  "description": "",
-  "keywords": [
-    "typescript",
-    "template"
-  ],
+  "name": "bounan-downloader",
+  "version": "1.0",
+  "description": "Telegram client bot to copy files from LoanApi to Telegram",
+  "keywords": [],
   "author": {
-    "name": "Chris Wells",
-    "url": "https://chriswells.io"
+    "name": "HRAshton"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chriswells0/node-typescript-template.git"
+    "url": "https://github.com/hrashton/bounan-dev.git"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

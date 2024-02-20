@@ -1,4 +1,4 @@
-﻿import { queue } from "async";
+﻿import { queue } from 'async';
 
 enum Status {
     Waiting = 1,
@@ -26,8 +26,12 @@ export async function semiConcurrentProcess<TListItem, TFirstCallbackResult, TSe
                 return;
             }
 
+            if (results[i] === null) {
+                throw new Error('Result is not set');
+            }
+
             if (statuses[i] === Status.ProcessedByFirst) {
-                ordinalCallback(results[i]!);
+                ordinalCallback(results[i] as TFirstCallbackResult);
                 statuses[i] = Status.ProcessedBySecond;
             }
         }

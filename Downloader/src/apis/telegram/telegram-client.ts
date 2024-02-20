@@ -1,70 +1,67 @@
-﻿import { StringSession } from "telegram/sessions";
-import { Api, TelegramClient as NativeClient } from "telegram";
-import { Configuration } from "../../config/configuraion";
-// @ts-ignore
-import input from "input";
-import { Logger } from "sitka";
-import { NewMessage, NewMessageEvent } from "telegram/events";
-import { LifetimeConfiguration } from "../../config";
-import { TelegramClient as ITelegramClient } from "./interfaces/telegram-client";
+﻿import { StringSession } from 'telegram/sessions';
+import { Api, TelegramClient as GramjsClient } from 'telegram';
+import { Configuration } from '../../config/configuration';
+import { Logger } from 'sitka';
+import { NewMessage, NewMessageEvent } from 'telegram/events';
+import { LifetimeConfiguration } from '../../config';
+import { TelegramClient as ITelegramClient } from './interfaces/telegram-client';
 import Message = Api.Message;
+import { SmsCodeProvider } from '../sms-code-api/interfaces/sms-code-provider';
 
 export class TelegramClient implements ITelegramClient {
     private onMessageCallback: ((event: Message) => void) | undefined;
 
-    private client: NativeClient;
+    private client: GramjsClient;
     private logger: Logger;
 
     constructor(
         private lifetimeConfiguration: LifetimeConfiguration,
+        private smsCodeProvider: SmsCodeProvider,
     ) {
-        const { apiId, apiHash, botChatAlias } = Configuration.telegram;
+        const { apiId, apiHash } = Configuration.telegram;
 
         this.logger = Logger.getLogger({ name: this.constructor.name });
-        this.client = new NativeClient(new StringSession(lifetimeConfiguration.session), apiId, apiHash, {});
-
-        this.client.addEventHandler(
-            (event: NewMessageEvent) => {
-                if (!this.onMessageCallback) {
-                    throw new Error("onMessage callback is not set!");
-                }
-
-                this.onMessageCallback(event.message);
-            },
-            new NewMessage(
-                {
-                    incoming: true,
-                    outgoing: false,
-                    fromUsers: [botChatAlias, '@HRAshton'],
-                },
-            ),
-        );
+        this.client = new GramjsClient(new StringSession(lifetimeConfiguration.session), apiId, apiHash, {});
     }
 
     public onMessage(callback: (event: Message) => void): void {
-        if (!!this.onMessageCallback) {
-            throw new Error("onMessage callback is already set!");
+        if (this.onMessageCallback) {
+            throw new Error('onMessage callback is already set!');
         }
 
         this.onMessageCallback = callback;
     }
 
     public async start(): Promise<void> {
-        this.logger.info("Starting Telegram client...");
+        this.logger.info('Starting Telegram client...');
+
+        if (!this.onMessageCallback) {
+            throw new Error('onMessage callback is not set!');
+        }
+        const onMessageCallback: (event: Message) => void = this.onMessageCallback;
 
         await this.client.start({
             phoneNumber: Configuration.telegram.phone,
-            phoneCode: async () => await input.text("Please enter the code you received: "),
-            onError: (err) => this.logger.error("Error: ", err),
+            phoneCode: async () => await this.smsCodeProvider.waitForSmsCodeOrThrow(),
+            onError: (err) => this.logger.error('Error: ', err),
         });
 
-        this.logger.info("Telegram client started!");
+        this.client.addEventHandler(
+            (event: NewMessageEvent) => onMessageCallback(event.message),
+            new NewMessage({
+                incoming: true,
+                outgoing: false,
+                fromUsers: [Configuration.telegram.botChatAlias],
+            }),
+        );
+
+        this.logger.info('Telegram client started!');
 
         this.lifetimeConfiguration.session = this.client.session.save() as unknown as string;
     }
 
     public stop(): Promise<void> {
-        this.logger.info("Stopping Telegram client...");
+        this.logger.info('Stopping Telegram client...');
         return this.client.disconnect();
     }
 

@@ -1,6 +1,6 @@
-﻿import * as fs from "fs";
+﻿import * as fs from 'fs';
 
-import { LifetimeConfiguration as ILifetimeConfiguration } from "./index";
+import { LifetimeConfiguration as ILifetimeConfiguration } from './index';
 
 class LifetimeConfiguration implements ILifetimeConfiguration {
     private SESSION_FILE = 'session.txt';

@@ -10,6 +10,12 @@
         apiHash: string;
         phone: string;
         botChatAlias: string;
+
+        smsCodePooling: {
+            endpoint: string;
+            pollingInterval: number;
+            poolingTimeout: number;
+        };
     };
 }
 

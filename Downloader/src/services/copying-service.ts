@@ -1,14 +1,14 @@
-﻿import { Semaphore } from "async-mutex";
-import { Api } from "telegram";
+﻿import { Semaphore } from 'async-mutex';
+import { Api } from 'telegram';
 import Message = Api.Message;
-import { Logger } from "sitka";
-import { LoanApiClient } from "../apis/loan-api/interfaces/loan-api-client";
-import axios from "axios";
-import { ChildProcessWithoutNullStreams, spawn } from "node:child_process";
-import { Configuration } from "../config/configuraion";
-import { Writable } from "node:stream";
-import { semiConcurrentProcess } from "../utils/semi-concurrent-processing.utils";
-import { TelegramClient } from "../apis/telegram/interfaces/telegram-client";
+import { Logger } from 'sitka';
+import { LoanApiClient } from '../apis/loan-api/interfaces/loan-api-client';
+import axios from 'axios';
+import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
+import { Configuration } from '../config/configuration';
+import { Writable } from 'node:stream';
+import { semiConcurrentProcess } from '../utils/semi-concurrent-processing.utils';
+import { TelegramClient } from '../apis/telegram/interfaces/telegram-client';
 
 export class CopyingService {
     private readonly logger = Logger.getLogger({ name: this.constructor.name });
@@ -54,7 +54,7 @@ export class CopyingService {
     }
 
     private async downloadThumbnail(thumbnail: string) {
-        const thumbnailResponse = await axios.get(thumbnail, { responseType: "arraybuffer" });
+        const thumbnailResponse = await axios.get(thumbnail, { responseType: 'arraybuffer' });
         const thumbnailBuffer = Buffer.from(thumbnailResponse.data);
         this.logger.debug(`Thumbnail downloaded. Length: ${thumbnailBuffer.byteLength}`);
 
@@ -70,8 +70,8 @@ export class CopyingService {
         this.logger.debug(`Best quality playlist: ${bestQualityPlaylist}. Thumbnail: ${thumbnail}`);
 
         const playlistResponse = await axios.get(bestQualityPlaylist);
-        const filenames = playlistResponse.data.split("\n").filter((line: string) => line.startsWith("./"));
-        const basePlaylistUrl = bestQualityPlaylist.split("/").slice(0, -1).join("/");
+        const filenames = playlistResponse.data.split('\n').filter((line: string) => line.startsWith('./'));
+        const basePlaylistUrl = bestQualityPlaylist.split('/').slice(0, -1).join('/');
         const videoUrls: string[] = filenames.map((filename: string) => `${basePlaylistUrl}/${filename}`);
         this.logger.debug(`Video URLs: ${videoUrls}`);
 
@@ -79,18 +79,18 @@ export class CopyingService {
     }
 
     private runFfmpeg(): ChildProcessWithoutNullStreams {
-        return spawn("ffmpeg", [
-            "-i", "pipe:0",
-            "-c", "copy",
-            "-f", "mp4",
-            "-y",
+        return spawn('ffmpeg', [
+            '-i', 'pipe:0',
+            '-c', 'copy',
+            '-f', 'mp4',
+            '-y',
             Configuration.processing.outputFilePath,
         ]);
     }
 
     private async downloadVideoPart(url: string): Promise<ArrayBuffer> {
         this.logger.debug(`Downloading video part: ${url}`);
-        const response = await axios.get(url, { responseType: "arraybuffer" });
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
         this.logger.debug(`Downloaded video part: ${url}. Length: ${response.data.byteLength}`);
         return response.data;
     }

@@ -1,12 +1,14 @@
 import { Logger } from 'sitka';
-import { TelegramClient } from "./apis/telegram/telegram-client";
-import { lifetimeConfiguration } from "./config/lifetime-configuration";
-import { CopyingService } from "./services/copying-service";
-import { LoanApiClient } from "./apis/loan-api/loan-api-client";
-import axiosRetry from "axios-retry";
-import axios from "axios";
-import { Api } from "telegram";
+import { TelegramClient } from './apis/telegram/telegram-client';
+import { lifetimeConfiguration } from './config/lifetime-configuration';
+import { CopyingService } from './services/copying-service';
+import { LoanApiClient } from './apis/loan-api/loan-api-client';
+import axiosRetry from 'axios-retry';
+import axios from 'axios';
+import { Api } from 'telegram';
 import Message = Api.Message;
+import { SmsCodeProvider } from './apis/sms-code-api/sms-code-provider';
+import { pause } from './utils/promise.utils';
 
 axiosRetry(axios, { retries: 3 });
 
@@ -20,8 +22,9 @@ class Main {
     public async main(): Promise<void> {
         this._logger.info('Starting application...');
 
+        const smsCodeProvider = new SmsCodeProvider();
+        const telegramClient = new TelegramClient(lifetimeConfiguration, smsCodeProvider);
         const loanApiClient = new LoanApiClient();
-        const telegramClient = new TelegramClient(lifetimeConfiguration);
         const copyingService = new CopyingService(loanApiClient, telegramClient);
 
         telegramClient.onMessage(async (message: Message) =>
@@ -33,8 +36,7 @@ class Main {
 
         await this.run(telegramClient, copyingService);
 
-        await new Promise(() => {
-        });
+        await pause;
     }
 
     private async onStop(telegramClient: TelegramClient): Promise<void> {

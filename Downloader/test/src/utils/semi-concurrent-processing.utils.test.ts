@@ -1,13 +1,16 @@
 ﻿import { expect } from 'chai';
-import { semiConcurrentProcess } from "../../../src/utils/semi-concurrent-processing.utils";
+import { semiConcurrentProcess } from '../../../src/utils/semi-concurrent-processing.utils';
 
 describe('semiConcurrentProcess', () => {
+    const mockFn = () => {
+        // do nothing
+    };
+
     it('should throw an error if URLs are not unique', async () => {
         const urls = ['https://example.com', 'https://example.com'];
 
         try {
-            await semiConcurrentProcess(urls, async () => new ArrayBuffer(0), () => {
-            }, 1);
+            await semiConcurrentProcess(urls, async () => new ArrayBuffer(0), mockFn, 1);
         } catch (error: unknown) {
             expect(error).to.be.an('error');
             expect((error as Error).message).to.equal('All URLs should be different');
@@ -25,8 +28,7 @@ describe('semiConcurrentProcess', () => {
                 downloadCalls.push(item);
                 return item;
             },
-            () => {
-            },
+            mockFn,
             3,
         );
 

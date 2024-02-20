@@ -1,7 +1,7 @@
 ﻿'use strict';
 
 import { expect } from 'chai';
-import { LoanApiClient, TestSignedUrl } from "../../../src/apis/loan-api/loan-api-client";
+import { LoanApiClient, TestSignedUrl } from '../../../src/apis/loan-api/loan-api-client';
 
 describe('LoanApiClient', () => {
     it('should return true for valid signed URL', () => {

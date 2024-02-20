@@ -7,7 +7,7 @@ export type QualityPlaylistPairsWithThumbnail = {
 };
 
 export interface LoanApiClient {
-    isSignedUrlValid(signedUrl: any): boolean;
+    isSignedUrlValid(signedUrl: string | unknown): boolean;
 
     getHlsPlaylistUrls(signedUrl: string): Promise<QualityPlaylistPairsWithThumbnail>;
 }
