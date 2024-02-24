@@ -1,0 +1,1 @@
+﻿export const dubToKey = (dub: string): string => dub.toLowerCase().replaceAll(' ', '_');

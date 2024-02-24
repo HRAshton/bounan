@@ -1,0 +1,57 @@
+{
+    "name": "BounAn bot",
+    "version": "1.0",
+    "description": "",
+    "keywords": [],
+    "author": {
+        "name": "HRAshton"
+    },
+    "license": "BSD-3-Clause",
+    "repository": {
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.js",
+    "files": [
+        "dist/"
+    ],
+    "scripts": {
+        "build": "npm run clean && npm run lint && tsc",
+        "clean": "node -e \"var { rmdirSync, existsSync } = require('fs'), path = require('path'); ['./.nyc_output', './coverage', './dist'].forEach(fPath => {if (existsSync(path.join(__dirname, fPath))) rmdirSync(path.join(__dirname, fPath), { recursive: true })}); process.exit(0);\"",
+        "clean:all": "npm run clean && (rm -r ./node_modules || true)",
+        "cover": "nyc npm run test",
+        "cover:check": "nyc --check-coverage --reporter=lcov npm run test",
+        "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
+        "prepare": "npm run build",
+        "serve": "nodemon ./src/index.ts --exec ts-node --watch null",
+        "serve-watch": "nodemon ./src/index.ts",
+        "test": "mocha",
+        "upgrade": "npx npm-check -u"
+    },
+    "devDependencies": {
+        "@types/async": "^3.2.24",
+        "@types/chai": "^4.3.11",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.11.19",
+        "@typescript-eslint/eslint-plugin": "^5.61.0",
+        "@typescript-eslint/parser": "^5.61.0",
+        "chai": "^4.3.7",
+        "eslint": "^8.56.0",
+        "mocha": "^10.3.0",
+        "nodemon": "^2.0.22",
+        "nyc": "^15.1.0",
+        "source-map-support": "^0.5.21",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "async": "^3.2.5",
+        "async-mutex": "^0.4.1",
+        "axios": "^1.6.7",
+        "axios-retry": "^4.0.0",
+        "firebase-admin": "^12.0.0",
+        "input": "^1.0.1",
+        "sitka": "^1.1.1",
+        "telegraf": "^4.15.3",
+        "telegram": "^2.19.15"
+    }
+}
