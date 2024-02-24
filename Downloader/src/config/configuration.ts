@@ -13,6 +13,8 @@ export const Configuration: IConfiguration = {
         phone: '+0',
         botChatAlias: '@0',
 
+        uploadWorkers: 10,
+
         smsCodePooling: {
             endpoint: 'https://0',
             pollingInterval: 5_000,

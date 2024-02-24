@@ -11,6 +11,8 @@
         phone: string;
         botChatAlias: string;
 
+        uploadWorkers: number;
+
         smsCodePooling: {
             endpoint: string;
             pollingInterval: number;

@@ -7,6 +7,8 @@ import { LifetimeConfiguration } from '../../config';
 import { TelegramClient as ITelegramClient } from './interfaces/telegram-client';
 import Message = Api.Message;
 import { SmsCodeProvider } from '../sms-code-api/interfaces/sms-code-provider';
+import { CustomFile } from 'telegram/client/uploads';
+import * as fs from 'fs';
 
 export class TelegramClient implements ITelegramClient {
     private onMessageCallback: ((event: Message) => void) | undefined;
@@ -77,11 +79,17 @@ export class TelegramClient implements ITelegramClient {
     public async sendVideo(file: string, message: string, thumbnail: Buffer): Promise<void> {
         this.logger.info(`Uploading video to chat ${Configuration.telegram.botChatAlias}`);
 
-        await this.client.sendMessage(
+        const toUpload = new CustomFile(file, fs.statSync(file).size, file);
+        const fileResult = await this.client.uploadFile({
+            file: toUpload,
+            workers: Configuration.telegram.uploadWorkers,
+        });
+        
+        await this.client.sendFile(
             Configuration.telegram.botChatAlias,
             {
-                message,
-                file,
+                caption: message,
+                file: fileResult,
                 thumb: thumbnail,
             },
         );
