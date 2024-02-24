@@ -3,7 +3,7 @@ import { InlineQueryResultArticle } from '@telegraf/types/inline';
 import { AnimeInfo } from '../../apis/shikimori/interfaces/anime-info';
 import { Configuration } from '../../config/configuraion';
 import { ShikimoriApiClient } from '../../apis/shikimori/interfaces/shikimori-api-client';
-import { LoanApiClient } from '../../apis/loan-api/interfaces/loan-api-client';
+import { BotLoanApiClient as LoanApiClient } from '../../apis/loan-api';
 import { AllCommands } from './index';
 import { dubToKey } from '../../utils/anime.utils';
 

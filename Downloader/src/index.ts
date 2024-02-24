@@ -1,16 +1,18 @@
+import 'dotenv/config';
 import { Logger } from 'sitka';
 import { TelegramClient } from './apis/telegram/telegram-client';
 import { lifetimeConfiguration } from './config/lifetime-configuration';
 import { CopyingService } from './services/copying-service';
-import { LoanApiClient } from './apis/loan-api/loan-api-client';
 import axiosRetry from 'axios-retry';
 import axios from 'axios';
 import { Api } from 'telegram';
 import Message = Api.Message;
 import { SmsCodeProvider } from './apis/sms-code-api/sms-code-provider';
 import { pause } from './utils/promise.utils';
+import { DwnLoanApiClientImpl } from './apis/loan-api';
+import { Configuration } from './config/configuration';
 
-axiosRetry(axios, { retries: 3 });
+axiosRetry(axios, { retries: Configuration.axios.retries });
 
 class Main {
     private _logger: Logger;
@@ -24,7 +26,7 @@ class Main {
 
         const smsCodeProvider = new SmsCodeProvider();
         const telegramClient = new TelegramClient(lifetimeConfiguration, smsCodeProvider);
-        const loanApiClient = new LoanApiClient();
+        const loanApiClient = new DwnLoanApiClientImpl();
         const copyingService = new CopyingService(loanApiClient, telegramClient);
 
         telegramClient.onMessage(async (message: Message) =>

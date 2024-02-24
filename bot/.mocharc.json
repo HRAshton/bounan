@@ -1,5 +1,5 @@
 {
-    "require": ["source-map-support/register", "ts-node/register"],
+    "require": ["source-map-support/register", "ts-node/register", "dotenv/config"],
     "extension": "ts",
     "spec": "test/**/*.ts"
 }

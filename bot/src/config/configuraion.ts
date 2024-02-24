@@ -1,18 +1,34 @@
 ﻿import { Configuration as IConfiguration } from './index';
 
+const getEnv = (name: string, defaultValue?: string): string => {
+    const value = process.env[name];
+    if (value !== undefined) {
+        return value;
+    }
+
+    if (defaultValue !== undefined) {
+        return defaultValue;
+    }
+
+    throw new Error(`Environment variable ${name} is not defined`);
+}
+
 export const Configuration: IConfiguration = {
     loanApi: {
-        token: '',
+        token: getEnv('LOAN_API_TOKEN'),
     },
     telegram: {
-        botToken: '',
-        videoProviderUserId: 0,
+        botToken: getEnv('TELEGRAM_BOT_TOKEN'),
+        videoProviderUserId: parseInt(getEnv('VIDEO_PROVIDER_USER_ID')),
         buttonsPagination: {
-            columns: 7,
-            rows: 3,
+            columns: parseInt(getEnv('TELEGRAM_BUTTONS_COLUMNS', '7')),
+            rows: parseInt(getEnv('TELEGRAM_BUTTONS_ROWS', '3')),
         },
     },
     shikimori: {
-        baseDomain: 'https://shikimori.one',
+        baseDomain: getEnv('SHIKIMORI_BASE_DOMAIN', 'https://shikimori.one'),
+    },
+    axios: {
+        retries: parseInt(getEnv('AXIOS_RETRIES', '3')),
     },
 }

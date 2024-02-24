@@ -4,11 +4,11 @@ import { Logger } from 'sitka';
 import { Markup, Telegram } from 'telegraf';
 import { Configuration } from '../config/configuraion';
 import { ShikimoriApiClient } from '../apis/shikimori/interfaces/shikimori-api-client';
-import { HtmlParser } from '../apis/loan-api/html-parser';
+import { HtmlParser } from '../apis/loan-api';
 import axios from 'axios';
 import { getButtonsBlocks } from '../utils/buttons.utils';
 import { dubToKey } from '../utils/anime.utils';
-import { LoanApiClient } from '../apis/loan-api/interfaces/loan-api-client';
+import { BotLoanApiClient as LoanApiClient } from '../apis/loan-api';
 
 
 export class VideoService implements IVideoService {

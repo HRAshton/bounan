@@ -13,4 +13,7 @@
     shikimori: {
         baseDomain: string;
     };
+    axios: {
+        retries: number;
+    };
 }

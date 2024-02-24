@@ -84,7 +84,7 @@ export class TelegramClient implements ITelegramClient {
             file: toUpload,
             workers: Configuration.telegram.uploadWorkers,
         });
-        
+
         await this.client.sendFile(
             Configuration.telegram.botChatAlias,
             {

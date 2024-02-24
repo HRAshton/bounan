@@ -1,13 +1,18 @@
+import 'dotenv/config';
 import './extensions/list.extensions';
 import { Telegraf } from 'telegraf';
 import { callbackQuery, message } from 'telegraf/filters';
 import { Configuration } from './config/configuraion';
 import { ShikimoriApiClient } from './apis/shikimori/shikimori-api-client';
-import { LoanApiClient } from './apis/loan-api/loan-api-client';
+import { BotLoanApiClientImpl as LoanApiClient } from './apis/loan-api';
 import { BotCommandHandleService } from './services/bot-command-handle-service';
 import { Message } from 'telegraf/typings/core/types/typegram';
 import { VideoService } from './services/video-service';
 import { VideoRepository } from './repositories/video-repository';
+import axiosRetry from 'axios-retry';
+import axios from 'axios';
+
+axiosRetry(axios, { retries: Configuration.axios.retries });
 
 const bot = new Telegraf(Configuration.telegram.botToken);
 
@@ -15,7 +20,7 @@ process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 const shikimoriClient = new ShikimoriApiClient();
-const loanApiClient = new LoanApiClient();
+const loanApiClient = new LoanApiClient(Configuration.loanApi.token);
 const videoRepository = new VideoRepository();
 const videoService = new VideoService(shikimoriClient, loanApiClient, bot.telegram, videoRepository);
 const botCommandHandleService = new BotCommandHandleService(shikimoriClient, loanApiClient, videoService);

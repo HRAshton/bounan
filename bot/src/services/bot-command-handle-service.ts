@@ -1,5 +1,5 @@
 ﻿import { ShikimoriApiClient } from '../apis/shikimori/interfaces/shikimori-api-client';
-import { LoanApiClient } from '../apis/loan-api/interfaces/loan-api-client';
+import { BotLoanApiClient as LoanApiClient } from '../apis/loan-api';
 import { Logger } from 'sitka';
 import { Context } from 'telegraf';
 import * as InlineQueryHandlers from './handlers/inline-query-handlers';
@@ -51,7 +51,7 @@ export class BotCommandHandleService implements IBotCommandHandleService {
             }
 
             if (userId === Configuration.telegram.videoProviderUserId) {
-                this.logger.warn(`Text from video provider: ${text}`);
+                this.logger.warn(`Video provider reported error for file: ${text}`);
                 const isUrl = text.startsWith('http');
                 if (isUrl) {
                     await this.videoService.registerFile(text, '');

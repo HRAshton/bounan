@@ -1,5 +1,5 @@
 ﻿import { expect } from 'chai';
-import { pause, retryWithTimeout } from '../../../src/utils/promise.utils';
+import { pause, retryWithTimeout } from '../../src/utils/promise.utils';
 import { sleep } from 'telegram/Helpers';
 
 describe('promise.utils', () => {

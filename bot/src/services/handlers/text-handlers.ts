@@ -1,10 +1,10 @@
 ﻿import { Context, Markup } from 'telegraf';
 import { Configuration } from '../../config/configuraion';
 import { ShikimoriApiClient } from '../../apis/shikimori/interfaces/shikimori-api-client';
-import { LoanApiClient } from '../../apis/loan-api/interfaces/loan-api-client';
+import { BotLoanApiClient as LoanApiClient } from '../../apis/loan-api';
 import { AllCommands } from './index';
 import { dubToKey } from '../../utils/anime.utils';
-import { SearchResultItem } from '../../apis/loan-api/interfaces/search-result-item';
+import { SearchResultItem } from '../../apis/loan-api';
 import { VideoService } from '../interfaces/video-service';
 import { VideoStatus } from '../../repositories/interfaces/video-repository';
 import { getButtonsBlocks } from '../../utils/buttons.utils';

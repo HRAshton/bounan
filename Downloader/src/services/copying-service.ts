@@ -2,7 +2,7 @@
 import { Api } from 'telegram';
 import Message = Api.Message;
 import { Logger } from 'sitka';
-import { LoanApiClient } from '../apis/loan-api/interfaces/loan-api-client';
+import { DwnLoanApiClient as LoanApiClient } from '../apis/loan-api';
 import axios from 'axios';
 import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
 import { Configuration } from '../config/configuration';

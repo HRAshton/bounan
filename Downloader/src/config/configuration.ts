@@ -1,24 +1,40 @@
 ﻿import { Configuration as IConfiguration } from './index';
 
+const getEnv = (name: string, defaultValue?: string): string => {
+    const value = process.env[name];
+    if (value !== undefined) {
+        return value;
+    }
+
+    if (defaultValue !== undefined) {
+        return defaultValue;
+    }
+
+    throw new Error(`Environment variable ${name} is not defined`);
+}
+
 export const Configuration: IConfiguration = {
     downloading: {
-        maxConcurrentDownloads: 30,
+        maxConcurrentDownloads: parseInt(getEnv('MAX_CONCURRENT_DOWNLOADS', '5')),
     },
     processing: {
-        outputFilePath: '/tmp/output.mp4',
+        outputFilePath: getEnv('OUTPUT_FILE_PATH', '/tmp/output.mp4'),
     },
     telegram: {
-        apiId: 0,
-        apiHash: '0',
-        phone: '+0',
-        botChatAlias: '@0',
+        apiId: parseInt(getEnv('TELEGRAM_API_ID')),
+        apiHash: getEnv('TELEGRAM_API_HASH'),
+        phone: getEnv('TELEGRAM_PHONE_NUMBER'),
+        botChatAlias: getEnv('TELEGRAM_BOT_CHAT_ALIAS'),
 
-        uploadWorkers: 10,
+        uploadWorkers: parseInt(getEnv('TELEGRAM_UPLOAD_WORKERS', '10')),
 
         smsCodePooling: {
-            endpoint: 'https://0',
-            pollingInterval: 5_000,
-            poolingTimeout: 60_000,
+            endpoint: getEnv('TELEGRAM_SMS_CODE_POOLING_ENDPOINT'),
+            pollingInterval: parseInt(getEnv('TELEGRAM_SMS_CODE_POLLING_INTERVAL', '5000')),
+            poolingTimeout: parseInt(getEnv('TELEGRAM_SMS_CODE_POOLING_TIMEOUT', '60000')),
         },
+    },
+    axios: {
+        retries: parseInt(getEnv('AXIOS_RETRIES', '3')),
     },
 }

@@ -1,5 +1,5 @@
 ﻿import { expect } from 'chai';
-import { semiConcurrentProcess } from '../../../src/utils/semi-concurrent-processing.utils';
+import { semiConcurrentProcess } from '../../src/utils/semi-concurrent-processing.utils';
 
 describe('semiConcurrentProcess', () => {
     const mockFn = () => {

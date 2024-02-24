@@ -19,6 +19,9 @@
             poolingTimeout: number;
         };
     };
+    axios: {
+        retries: number;
+    };
 }
 
 export interface LifetimeConfiguration {
