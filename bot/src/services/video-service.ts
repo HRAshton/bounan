@@ -88,7 +88,7 @@ export class VideoService implements IVideoService {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        await this.videoRepository.addVideo(video);
+        await this.videoRepository.addVideoIfNotExist(video);
     }
 
     private async requestNextEpisode(signedLink: string): Promise<void> {

@@ -23,7 +23,7 @@ export type GetVideoWithRequestersResponse = {
 export interface VideoRepository {
     getVideo(signedLink: string): Promise<VideoEntity | undefined>;
 
-    addVideo(video: VideoEntity): Promise<void>;
+    addVideoIfNotExist(video: VideoEntity): Promise<void>;
 
     addRequester(signedLink: string, requesterUserId: number): Promise<void>;
     
