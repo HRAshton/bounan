@@ -55,4 +55,4 @@ bot.on([message('video'), message('document')], async (ctx) => {
     await botCommandHandleService.handleVideo(userId, signedLink, fileId);
 });
 
-bot.launch()
+export { bot };

@@ -14,7 +14,6 @@ const getEnv = (name: string, defaultValue?: string): string => {
 }
 
 export const Configuration: IConfiguration = {
-    firebaseConfigJson: getEnv('FIREBASE_CONFIG_JSON'),
     loanApi: {
         token: getEnv('LOAN_API_TOKEN'),
     },

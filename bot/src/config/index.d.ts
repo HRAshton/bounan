@@ -1,5 +1,4 @@
 ﻿export interface Configuration {
-    firebaseConfigJson: string;
     loanApi: {
         token: string;
     };
