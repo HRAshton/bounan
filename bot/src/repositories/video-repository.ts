@@ -1,109 +1,111 @@
-﻿import {
-    GetVideoWithRequestersResponse,
+﻿import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import {
     VideoEntity,
-    VideoRepository as IVideoRepository, VideoStatus
+    VideoStatus,
+    VideoRepository as IVideoRepository, VideoWithRequesters,
 } from './interfaces/video-repository';
-import { firestore } from './contexts/firestore-context';
-import { Semaphore } from 'async-mutex';
+
+const dynamoDBClient = new DynamoDBClient({});
+const dynamoDb = DynamoDBDocumentClient.from(dynamoDBClient);
 
 export class VideoRepository implements IVideoRepository {
-    private static readonly semaphore = new Semaphore(1);
+    private tableName = 'Videos';
 
-    public async getVideo(signedLink: string): Promise<VideoEntity | undefined> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(signedLink);
-
-            const doc = await firestore
-                .collection('videos')
-                .doc(key)
-                .get();
-
-            return doc.data() as VideoEntity;
-        });
+    public async getVideo(signedLink: string): Promise<VideoEntity | null> {
+        return this.tryGetVideo(signedLink);
     }
 
     public async addVideoIfNotExist(video: VideoEntity): Promise<void> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(video.signedLink);
-            const videoDocument = firestore.collection('videos').doc(key);
-            if ((await videoDocument.get()).exists) {
-                return;
-            }
+        const params = {
+            TableName: this.tableName,
+            Item: video,
+            ConditionExpression: 'attribute_not_exists(signedLink)',
+        };
 
-            await videoDocument.create(video);
-        });
+        try {
+            await dynamoDb.send(new PutCommand(params));
+        } catch (error: unknown) {
+            if ((error as Error).name !== 'ConditionalCheckFailedException') {
+                throw error;
+            }
+            // If the error is ConditionalCheckFailedException, the video already exists, so we do nothing.
+        }
     }
 
     public async addRequester(signedLink: string, requesterUserId: number): Promise<void> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(signedLink);
-            const videoDocument = firestore.collection('videos').doc(key);
-            const requesterDocument = videoDocument
-                .collection('requesters')
-                .doc(requesterUserId.toString());
+        const params = {
+            TableName: this.tableName,
+            Key: { signedLink },
+            UpdateExpression: 'ADD requesters :requester',
+            ExpressionAttributeValues: {
+                ':requester': new Set([requesterUserId]),
+            },
+        };
 
-            await requesterDocument.set({ userId: requesterUserId });
-        });
+        await dynamoDb.send(new UpdateCommand(params));
     }
 
-    public async getVideoWithRequesters(signedLink: string): Promise<GetVideoWithRequestersResponse> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(signedLink);
-            const videoDocument = firestore.collection('videos').doc(key);
-            const [videoSnapshot, requestersSnapshot] = await Promise.all([
-                videoDocument.get(),
-                videoDocument.collection('requesters').get(),
-            ]);
-
-            const video = videoSnapshot.data() as VideoEntity;
-            const requesters = requestersSnapshot.docs.map((doc) => doc.data().userId);
-
-            return { video, requesters };
-        });
+    public getVideoWithRequesters(signedLink: string): Promise<VideoWithRequesters> {
+        return this.tryGetVideo(signedLink) as Promise<VideoWithRequesters>;
     }
 
     public async clearRequesters(signedLink: string): Promise<void> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(signedLink);
-            const videoDocument = firestore.collection('videos').doc(key);
-            const requestersSnapshot = await videoDocument.collection('requesters').get();
+        const params = {
+            TableName: this.tableName,
+            Key: { signedLink },
+            UpdateExpression: 'SET requesters = :null_value',
+            ExpressionAttributeValues: {
+                ':null_value': null,
+            },
+        };
 
-            await firestore.runTransaction(async (transaction) => {
-                requestersSnapshot.docs.forEach((doc) => transaction.delete(doc.ref));
-            });
-        });
+        await dynamoDb.send(new UpdateCommand(params));
     }
 
     public async markAsUploaded(signedLink: string, fileId: string): Promise<void> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(signedLink);
+        const params = {
+            TableName: this.tableName,
+            Key: { signedLink },
+            UpdateExpression: 'SET fileId = :fileId, videoStatus = :status, updatedAt = :updatedAt',
+            ExpressionAttributeValues: {
+                ':fileId': fileId,
+                ':status': VideoStatus.Uploaded,
+                ':updatedAt': new Date().toISOString(),
+            },
+        };
 
-            await firestore
-                .collection('videos')
-                .doc(key)
-                .update({
-                    fileId,
-                    status: VideoStatus.Uploaded,
-                    updatedAt: new Date(),
-                });
-        });
+        await dynamoDb.send(new UpdateCommand(params));
     }
 
     public async markAsFailed(signedLink: string): Promise<void> {
-        return VideoRepository.semaphore.runExclusive(async () => {
-            const key = VideoRepository.toKey(signedLink);
+        const params = {
+            TableName: this.tableName,
+            Key: { signedLink },
+            UpdateExpression: 'SET videoStatus = :status, updatedAt = :updatedAt',
+            ExpressionAttributeValues: {
+                ':status': VideoStatus.Failed,
+                ':updatedAt': new Date().toISOString(),
+            },
+        };
 
-            await firestore
-                .collection('videos')
-                .doc(key)
-                .update({
-                    status: VideoStatus.Failed,
-                    updatedAt: new Date(),
-                });
-        });
+        await dynamoDb.send(new UpdateCommand(params));
     }
 
-    private static toKey(signedLink: string): string {
-        return signedLink.replaceAll('/', '|');
+    private async tryGetVideo(signedLink: string): Promise<VideoWithRequesters | null> {
+        const params = {
+            TableName: this.tableName,
+            Key: { signedLink },
+        };
+
+        try {
+            const result = await dynamoDb.send(new GetCommand(params));
+            return result.Item as VideoWithRequesters | null;
+        } catch (error: unknown) {
+            if ((error as Error).name === 'ResourceNotFoundException') {
+                return null;
+            }
+            throw error;
+        }
     }
 }

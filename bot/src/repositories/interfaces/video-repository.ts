@@ -9,25 +9,22 @@ export interface VideoEntity {
     myAnimeListId: number;
     dub: string;
     episode: number;
-    status: VideoStatus;
+    videoStatus: VideoStatus;
     fileId: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 }
 
-export type GetVideoWithRequestersResponse = {
-    video: VideoEntity;
-    requesters: number[];
-};
+export type VideoWithRequesters = VideoEntity & { requesters: Set<number> };
 
 export interface VideoRepository {
-    getVideo(signedLink: string): Promise<VideoEntity | undefined>;
+    getVideo(signedLink: string): Promise<VideoEntity | null>;
 
     addVideoIfNotExist(video: VideoEntity): Promise<void>;
 
     addRequester(signedLink: string, requesterUserId: number): Promise<void>;
-    
-    getVideoWithRequesters(signedLink: string): Promise<GetVideoWithRequestersResponse>;
+
+    getVideoWithRequesters(signedLink: string): Promise<VideoWithRequesters>;
 
     clearRequesters(signedLink: string): Promise<void>;
 

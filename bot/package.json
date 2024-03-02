@@ -14,6 +14,7 @@
         "dist/"
     ],
     "scripts": {
+        "start-bot": "npm run-script serve",
         "build": "npm run clean && npm run lint && tsc",
         "clean": "node -e \"var { rmdirSync, existsSync } = require('fs'), path = require('path'); ['./.nyc_output', './coverage', './dist'].forEach(fPath => {if (existsSync(path.join(__dirname, fPath))) rmdirSync(path.join(__dirname, fPath), { recursive: true })}); process.exit(0);\"",
         "clean:all": "npm run clean && (rm -r ./node_modules || true)",
@@ -43,12 +44,14 @@
         "typescript": "^5.3.3"
     },
     "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.525.0",
+        "@aws-sdk/lib-dynamodb": "^3.525.0",
         "async": "^3.2.5",
         "async-mutex": "^0.4.1",
+        "aws-sdk": "^2.1569.0",
         "axios": "^1.6.7",
         "axios-retry": "^4.0.0",
         "dotenv": "^16.4.5",
-        "firebase-admin": "^12.0.0",
         "sitka": "^1.1.1",
         "telegraf": "^4.15.3",
         "telegram": "^2.19.15"

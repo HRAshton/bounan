@@ -28,7 +28,7 @@ export class VideoService implements IVideoService {
         this.logger.debug(`tryGetVideoFileId: ${signedLink}`);
         const video = await this.videoRepository.getVideo(signedLink);
 
-        switch (video?.status) {
+        switch (video?.videoStatus) {
         case undefined:
             this.logger.debug(`tryGetVideoFileId: ${signedLink} - not found`);
             await this.registerVideo(signedLink, malId, episode);
@@ -83,17 +83,17 @@ export class VideoService implements IVideoService {
             myAnimeListId: malId,
             dub: videoInfo.dub,
             episode,
-            status: VideoStatus.Pending,
+            videoStatus: VideoStatus.Pending,
             fileId: '',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         };
         await this.videoRepository.addVideoIfNotExist(video);
     }
 
     private async requestNextEpisode(signedLink: string): Promise<void> {
         const video = await this.videoRepository.getVideo(signedLink);
-        if (video?.status !== VideoStatus.Uploaded) {
+        if (video?.videoStatus !== VideoStatus.Uploaded) {
             throw new Error('Video is not uploaded. Why is it requested?');
         }
 
@@ -119,7 +119,7 @@ export class VideoService implements IVideoService {
     }
 
     private async notifyRequestersSuccess(signedLink: string, fileId: string): Promise<void> {
-        const { video, requesters } = await this.videoRepository.getVideoWithRequesters(signedLink);
+        const { requesters, ...video } = await this.videoRepository.getVideoWithRequesters(signedLink);
         const [animeInfo, loanInfo] = await Promise.all([
             this.shikimoriClient.animeInfo(video.myAnimeListId),
             this.loanClient.search(video.myAnimeListId),
@@ -141,7 +141,7 @@ export class VideoService implements IVideoService {
     }
 
     private async notifyRequestersFailure(signedLink: string): Promise<void> {
-        const { video, requesters } = await this.videoRepository.getVideoWithRequesters(signedLink);
+        const { requesters, ...video } = await this.videoRepository.getVideoWithRequesters(signedLink);
         const animeInfo = await this.shikimoriClient.animeInfo(video.myAnimeListId);
 
         for (const requester of requesters) {
