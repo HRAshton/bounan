@@ -40,7 +40,7 @@ export class CopyingService {
         await semiConcurrentProcess(
             videoUrls,
             async (url: string) => await this.downloadVideoPart(url),
-            (part: ArrayBuffer) => this.processVideoPart(part, ffmpeg.stdin),
+            (part: ArrayBuffer, i: number, total: number) => this.processVideoPart(part, ffmpeg.stdin, i, total),
             Configuration.downloading.maxConcurrentDownloads,
         );
         ffmpeg.stdin.end();
@@ -91,12 +91,12 @@ export class CopyingService {
     private async downloadVideoPart(url: string): Promise<ArrayBuffer> {
         this.logger.debug(`Downloading video part: ${url}`);
         const response = await axios.get(url, { responseType: 'arraybuffer' });
-        this.logger.debug(`Downloaded video part: ${url}. Length: ${response.data.byteLength}`);
+        this.logger.debug(`Downloaded video part: ...${url.slice(-35)}. Length: ${response.data.byteLength}`);
         return response.data;
     }
 
-    private processVideoPart(part: ArrayBuffer, writable: Writable): void {
-        this.logger.debug(`Processing video part of length: ${part.byteLength}`);
+    private processVideoPart(part: ArrayBuffer, writable: Writable, index: number, total: number): void {
+        this.logger.debug(`Processing video part #${index + 1}/${total} (${part.byteLength} bytes)`);
         writable.write(part);
     }
 }
