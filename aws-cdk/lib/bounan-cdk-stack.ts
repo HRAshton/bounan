@@ -24,6 +24,7 @@ export class BounanCdkStack extends cdk.Stack {
                 TELEGRAM_BOT_TOKEN: config.telegramBotToken,
                 VIDEO_PROVIDER_USER_ID: config.videoProviderUserId,
             },
+            timeout: cdk.Duration.seconds(10),
         });
 
         filesTable.grantReadWriteData(botFunction);

@@ -60,15 +60,44 @@ export class VideoService implements IVideoService {
 
         if (fileId) {
             await this.videoRepository.markAsUploaded(signedLink, fileId);
+            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - marked as uploaded`);
+
             await this.notifyRequestersSuccess(signedLink, fileId);
+            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - notified requesters`);
+
             await this.requestNextEpisode(signedLink);
-            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - done`);
+            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - requested next episode`);
         } else {
             await this.videoRepository.markAsFailed(signedLink);
+            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - marked as failed`);
+
             await this.notifyRequestersFailure(signedLink);
-            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - failed`);
+            this.logger.debug(`registerFile: ${signedLink}, ${fileId} - notified requesters`);
+        }
+    }
+
+    private async requestNextEpisode(signedLink: string): Promise<void> {
+        const video = await this.videoRepository.getVideo(signedLink);
+        if (video?.videoStatus !== VideoStatus.Uploaded) {
+            throw new Error('Video is not uploaded. Why is it requested?');
+        }
+
+        const nextEpisode = video.episode + 1;
+        const loanInfo = await this.loanClient.search(video.myAnimeListId);
+        const nextEpisodeInfo = loanInfo.find(x => x.episode === nextEpisode && x.dub === video.dub);
+        if (!nextEpisodeInfo) {
+            this.logger.debug(`nextEpisodeInfo not found for ${video.myAnimeListId} ${video.dub} ${nextEpisode}`);
             return;
         }
+
+        const alreadyRequested = await this.videoRepository.getVideo(nextEpisodeInfo.signedLink);
+        if (alreadyRequested) {
+            this.logger.debug(`Next episode already requested for ${video.myAnimeListId} ${video.dub} ${nextEpisode}`);
+            return;
+        }
+
+        await this.registerVideo(nextEpisodeInfo.signedLink, video.myAnimeListId, nextEpisode);
+        await this.requestVideo(nextEpisodeInfo.signedLink);
     }
 
     private async registerVideo(signedLink: string, malId: number, episode: number): Promise<void> {
@@ -91,28 +120,6 @@ export class VideoService implements IVideoService {
         await this.videoRepository.addVideoIfNotExist(video);
     }
 
-    private async requestNextEpisode(signedLink: string): Promise<void> {
-        const video = await this.videoRepository.getVideo(signedLink);
-        if (video?.videoStatus !== VideoStatus.Uploaded) {
-            throw new Error('Video is not uploaded. Why is it requested?');
-        }
-
-        const nextEpisode = video.episode + 1;
-        const loanInfo = await this.loanClient.search(video.myAnimeListId);
-        const nextEpisodeInfo = loanInfo.find(x => x.episode === nextEpisode && x.dub === video.dub);
-        if (!nextEpisodeInfo) {
-            return;
-        }
-
-        const alreadyRequested = await this.videoRepository.getVideo(nextEpisodeInfo.signedLink);
-        if (alreadyRequested) {
-            return;
-        }
-
-        await this.registerVideo(nextEpisodeInfo.signedLink, video.myAnimeListId, nextEpisode);
-        await this.requestVideo(nextEpisodeInfo.signedLink);
-    }
-
     private async requestVideo(signedLink: string): Promise<void> {
         await this.telegramClient.sendMessage(Configuration.telegram.videoProviderUserId, signedLink);
         this.logger.debug(`requestVideo: ${signedLink}`);
@@ -120,6 +127,11 @@ export class VideoService implements IVideoService {
 
     private async notifyRequestersSuccess(signedLink: string, fileId: string): Promise<void> {
         const { requesters, ...video } = await this.videoRepository.getVideoWithRequesters(signedLink);
+        if (!requesters || requesters.size === 0) {
+            this.logger.debug(`notifyRequestersSuccess: ${signedLink} - no requesters`);
+            return;
+        }
+
         const [animeInfo, loanInfo] = await Promise.all([
             this.shikimoriClient.animeInfo(video.myAnimeListId),
             this.loanClient.search(video.myAnimeListId),
@@ -133,7 +145,6 @@ export class VideoService implements IVideoService {
         };
 
         for (const requester of requesters) {
-
             await this.telegramClient.sendVideo(requester, fileId, extra);
         }
 
@@ -142,6 +153,11 @@ export class VideoService implements IVideoService {
 
     private async notifyRequestersFailure(signedLink: string): Promise<void> {
         const { requesters, ...video } = await this.videoRepository.getVideoWithRequesters(signedLink);
+        if (!requesters || requesters.size === 0) {
+            this.logger.debug(`notifyRequestersFailure: ${signedLink} - no requesters`);
+            return;
+        }
+
         const animeInfo = await this.shikimoriClient.animeInfo(video.myAnimeListId);
 
         for (const requester of requesters) {

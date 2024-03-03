@@ -1,4 +1,5 @@
-﻿import { bot } from './setup-bot';
+﻿import 'source-map-support/register';
+import { bot } from './setup-bot';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {

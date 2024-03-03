@@ -15,7 +15,7 @@ export interface VideoEntity {
     updatedAt: string;
 }
 
-export type VideoWithRequesters = VideoEntity & { requesters: Set<number> };
+export type VideoWithRequesters = VideoEntity & { requesters: Set<number> | null };
 
 export interface VideoRepository {
     getVideo(signedLink: string): Promise<VideoEntity | null>;

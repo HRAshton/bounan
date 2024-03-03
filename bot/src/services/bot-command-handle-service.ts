@@ -25,9 +25,9 @@ export class BotCommandHandleService implements IBotCommandHandleService {
     }
 
     public async handleStart(ctx: Context): Promise<void> {
-        try {
-            this.logger.debug('handleStart');
+        this.logger.debug('handleStart - start');
 
+        try {
             await ctx.reply('Напиши название аниме или нажми на кнопку "Искать", и я найду его для тебя', {
                 reply_markup: {
                     inline_keyboard: [
@@ -38,12 +38,14 @@ export class BotCommandHandleService implements IBotCommandHandleService {
         } catch (error) {
             this.logger.error('Fatal error', error);
         }
+
+        this.logger.debug('handleStart - end');
     }
 
     public async handleText(messageId: number, text: string, userId: number, ctx: Context): Promise<void> {
-        try {
-            this.logger.debug(`handleText: ${text}`);
+        this.logger.debug(`handleText: ${text} - start`);
 
+        try {
             const isKnownAnswer = Object.keys(InlineQueryHandlers.KnownInlineAnswers).includes(text);
             if (isKnownAnswer) {
                 await ctx.deleteMessage(messageId);
@@ -80,12 +82,14 @@ export class BotCommandHandleService implements IBotCommandHandleService {
         } catch (error) {
             this.logger.error('Fatal error', error);
         }
+
+        this.logger.debug(`handleText: ${text} - end`);
     }
 
     public async handleInlineQuery(query: string, ctx: Context): Promise<void> {
-        try {
-            this.logger.debug(`handleInlineQuery: ${query}`);
+        this.logger.debug(`handleInlineQuery: ${query} - start`);
 
+        try {
             const [command, ...args] = query.startsWith('.')
                 ? query.split(' ')
                 : [null, query];
@@ -112,21 +116,25 @@ export class BotCommandHandleService implements IBotCommandHandleService {
         } catch (error) {
             this.logger.error('Fatal error', error);
         }
+
+        this.logger.debug(`handleInlineQuery: ${query} - end`);
     }
 
     public async handleVideo(userId: number, text: string, fileId: string): Promise<void> {
-        try {
-            this.logger.debug(`handleVideo: ${userId} ${fileId}`);
+        this.logger.debug(`handleVideo: ${userId} ${fileId} - start`);
 
+        try {
             if (userId !== Configuration.telegram.videoProviderUserId) {
                 this.logger.warn(`handleVideo: unknown user: ${userId}`);
                 return;
             }
 
             this.logger.debug(`handleVideo: known user: ${userId}`);
-            this.videoService.registerFile(text, fileId);
+            await this.videoService.registerFile(text, fileId);
         } catch (error) {
             this.logger.error('Fatal error', error);
         }
+
+        this.logger.debug(`handleVideo: ${userId} ${fileId} - end`);
     }
 }

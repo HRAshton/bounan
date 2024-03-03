@@ -101,7 +101,7 @@ export class VideoRepository implements IVideoRepository {
 
         try {
             const result = await dynamoDb.send(new GetCommand(params));
-            return result.Item as VideoWithRequesters | null;
+            return result.Item as VideoWithRequesters;
         } catch (error: unknown) {
             if ((error as Error).name === 'ResourceNotFoundException') {
                 return null;
