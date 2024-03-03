@@ -5,6 +5,7 @@
 
     // Bot.
     telegramBotToken: string;
+    errorAlarmEmail: string;
 
     // Dwn.
     telegramApiId: string;
@@ -20,6 +21,9 @@ export const config: Config = {
 
     // Telegram user id of Downloader bot (which is actually user). Used in Dwn&Bot.
     videoProviderUserId: '',
+    
+    // Email for error alarm. Used in Bot.
+    errorAlarmEmail: '',
 
     // Telegram bot token. Used in Bot.
     telegramBotToken: '',
