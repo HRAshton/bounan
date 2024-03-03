@@ -5,12 +5,13 @@ import {
     VideoStatus,
     VideoRepository as IVideoRepository, VideoWithRequesters,
 } from './interfaces/video-repository';
+import { Configuration } from '../config/configuraion';
 
 const dynamoDBClient = new DynamoDBClient({});
 const dynamoDb = DynamoDBDocumentClient.from(dynamoDBClient);
 
 export class VideoRepository implements IVideoRepository {
-    private tableName = 'Videos';
+    private readonly tableName = Configuration.storage.filesTableName;
 
     public async getVideo(signedLink: string): Promise<VideoEntity | null> {
         return this.tryGetVideo(signedLink);

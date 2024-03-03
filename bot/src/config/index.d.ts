@@ -16,4 +16,7 @@
     axios: {
         retries: number;
     };
+    storage: {
+        filesTableName: string;
+    };
 }

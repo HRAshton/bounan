@@ -15,8 +15,7 @@
     ],
     "scripts": {
         "start-bot": "npm run-script serve",
-        "build": "npm run clean && npm run lint && esbuild src/start-webhook.ts --platform=node --target=es2020 --outfile=dist/index.js",
-        "postbuild": "cd dist && zip -r index.zip index.js* || PowerShell Compress-Archive -Path index.js* -DestinationPath index.zip",
+        "build": "npm run clean && npm run lint && esbuild src/start-webhook.ts --platform=node --bundle --minify --target=es2020 --outfile=dist/bot.js",
         "clean": "node -e \"var { rmdirSync, existsSync } = require('fs'), path = require('path'); ['./.nyc_output', './coverage', './dist'].forEach(fPath => {if (existsSync(path.join(__dirname, fPath))) rmdirSync(path.join(__dirname, fPath), { recursive: true })}); process.exit(0);\"",
         "clean:all": "npm run clean && (rm -r ./node_modules || true)",
         "cover": "nyc npm run test",

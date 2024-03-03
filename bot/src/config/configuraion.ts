@@ -31,4 +31,7 @@ export const Configuration: IConfiguration = {
     axios: {
         retries: parseInt(getEnv('AXIOS_RETRIES', '3')),
     },
+    storage: {
+        filesTableName: getEnv('FILES_TABLE_NAME'),
+    },
 }
