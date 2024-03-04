@@ -19,4 +19,7 @@
     storage: {
         filesTableName: string;
     };
+    sqs: {
+        queueUrl: string;
+    }
 }

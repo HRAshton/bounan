@@ -22,9 +22,12 @@
     axios: {
         retries: number;
     };
+    sqs: {
+        queueUrl: string;
+        waitTimeSeconds: number;
+    };
 }
 
 export interface LifetimeConfiguration {
     session: string;
-    lastMessageId: number;
 }

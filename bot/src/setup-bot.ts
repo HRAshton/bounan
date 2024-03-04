@@ -11,6 +11,8 @@ import { VideoService } from './services/video-service';
 import { VideoRepository } from './repositories/video-repository';
 import axiosRetry from 'axios-retry';
 import axios from 'axios';
+import { QueueService } from './services/queue-service';
+import { SQS } from '@aws-sdk/client-sqs';
 
 axiosRetry(axios, { retries: Configuration.axios.retries });
 
@@ -22,7 +24,8 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 const shikimoriClient = new ShikimoriApiClient();
 const loanApiClient = new LoanApiClient(Configuration.loanApi.token);
 const videoRepository = new VideoRepository();
-const videoService = new VideoService(shikimoriClient, loanApiClient, bot.telegram, videoRepository);
+const queueService = new QueueService(new SQS());
+const videoService = new VideoService(shikimoriClient, loanApiClient, bot.telegram, videoRepository, queueService);
 const botCommandHandleService = new BotCommandHandleService(shikimoriClient, loanApiClient, videoService);
 
 bot.command('start', botCommandHandleService.handleStart);

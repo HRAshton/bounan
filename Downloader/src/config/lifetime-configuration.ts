@@ -4,7 +4,6 @@ import { LifetimeConfiguration as ILifetimeConfiguration } from './index';
 
 class LifetimeConfiguration implements ILifetimeConfiguration {
     private SESSION_FILE = 'session.txt';
-    private LAST_MESSAGE_ID_FILE = 'last-message-id.txt';
 
     public get session(): string {
         return this.readFromFile(this.SESSION_FILE) || '';
@@ -12,15 +11,6 @@ class LifetimeConfiguration implements ILifetimeConfiguration {
 
     public set session(value: string) {
         this.writeToFile(this.SESSION_FILE, value);
-    }
-
-    public get lastMessageId(): number {
-        const lastMessageId = this.readFromFile(this.LAST_MESSAGE_ID_FILE);
-        return lastMessageId ? parseInt(lastMessageId) : 0;
-    }
-
-    public set lastMessageId(value: number) {
-        this.writeToFile(this.LAST_MESSAGE_ID_FILE, value?.toString() || '');
     }
 
     private readFromFile(filename: string): string | undefined {

@@ -2,14 +2,13 @@
 import { VideoRepository, VideoStatus } from '../repositories/interfaces/video-repository';
 import { Logger } from 'sitka';
 import { Markup, Telegram } from 'telegraf';
-import { Configuration } from '../config/configuraion';
 import { ShikimoriApiClient } from '../apis/shikimori/interfaces/shikimori-api-client';
 import { HtmlParser } from '../apis/loan-api';
 import axios from 'axios';
 import { getButtonsBlocks } from '../utils/buttons.utils';
 import { dubToKey } from '../utils/anime.utils';
 import { BotLoanApiClient as LoanApiClient } from '../apis/loan-api';
-
+import { QueueService } from './interfaces/queue-service';
 
 export class VideoService implements IVideoService {
     private logger: Logger;
@@ -19,6 +18,7 @@ export class VideoService implements IVideoService {
         private readonly loanClient: LoanApiClient,
         private readonly telegramClient: Telegram,
         private readonly videoRepository: VideoRepository,
+        private readonly queueService: QueueService,
     ) {
         this.logger = Logger.getLogger({ name: this.constructor.name });
     }
@@ -121,8 +121,7 @@ export class VideoService implements IVideoService {
     }
 
     private async requestVideo(signedLink: string): Promise<void> {
-        await this.telegramClient.sendMessage(Configuration.telegram.videoProviderUserId, signedLink);
-        this.logger.debug(`requestVideo: ${signedLink}`);
+        await this.queueService.requestVideo(signedLink);
     }
 
     private async notifyRequestersSuccess(signedLink: string, fileId: string): Promise<void> {

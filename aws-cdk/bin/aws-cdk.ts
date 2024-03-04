@@ -4,4 +4,4 @@ import * as cdk from 'aws-cdk-lib';
 import { BounanCdkStack } from '../lib/bounan-cdk-stack';
 
 const app = new cdk.App();
-new BounanCdkStack(app, 'bounan-stack');
+new BounanCdkStack(app, 'bounan-app');

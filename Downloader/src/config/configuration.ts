@@ -37,4 +37,8 @@ export const Configuration: IConfiguration = {
     axios: {
         retries: parseInt(getEnv('AXIOS_RETRIES', '3')),
     },
+    sqs: {
+        queueUrl: getEnv('SQS_QUEUE_URL'),
+        waitTimeSeconds: parseInt(getEnv('SQS_WAIT_TIME_SECONDS', '20')),
+    },
 }

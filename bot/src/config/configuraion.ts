@@ -34,4 +34,7 @@ export const Configuration: IConfiguration = {
     storage: {
         filesTableName: getEnv('FILES_TABLE_NAME'),
     },
+    sqs: {
+        queueUrl: getEnv('TO_DOWNLOAD_SQS_URL'),
+    }
 }

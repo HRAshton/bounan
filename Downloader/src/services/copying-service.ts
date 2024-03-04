@@ -1,6 +1,4 @@
 ﻿import { Semaphore } from 'async-mutex';
-import { Api } from 'telegram';
-import Message = Api.Message;
 import { Logger } from 'sitka';
 import { DwnLoanApiClient as LoanApiClient } from '../apis/loan-api';
 import axios from 'axios';
@@ -21,20 +19,20 @@ export class CopyingService {
         this.copyVideoToTelegram = this.copyVideoToTelegram.bind(this);
     }
 
-    public async copyVideoToTelegram(message: Message): Promise<void> {
+    public async copyVideoToTelegram(signedLink: string): Promise<void> {
         return await this.semaphore.runExclusive(async () => {
-            await this.copyVideoToTelegramInternal(message);
+            await this.copyVideoToTelegramInternal(signedLink);
         });
     }
 
-    private async copyVideoToTelegramInternal(message: Message): Promise<void> {
-        if (!this.loanApiClient.isSignedUrlValid(message.text)) {
-            this.logger.error(`Invalid signed URL: '${message.text}'`);
+    private async copyVideoToTelegramInternal(signedLink: string): Promise<void> {
+        if (!this.loanApiClient.isSignedUrlValid(signedLink)) {
+            this.logger.error(`Invalid signed URL: '${signedLink}'`);
             return;
         }
 
-        this.logger.info(`Copying video: ${message.text}`);
-        const [videoUrls, thumbnail] = await this.getVideoPartsAndThumbnailUrls(message);
+        this.logger.info(`Copying video: ${signedLink}`);
+        const [videoUrls, thumbnail] = await this.getVideoPartsAndThumbnailUrls(signedLink);
 
         const ffmpeg = this.runFfmpeg();
         await semiConcurrentProcess(
@@ -48,7 +46,7 @@ export class CopyingService {
         this.logger.debug(`Video copied to: ${Configuration.processing.outputFilePath}`);
 
         const thumbnailBuffer = await this.downloadThumbnail(thumbnail);
-        await this.telegramClient.sendVideo(Configuration.processing.outputFilePath, message.text, thumbnailBuffer);
+        await this.telegramClient.sendVideo(Configuration.processing.outputFilePath, signedLink, thumbnailBuffer);
 
         this.logger.info(`Video sent to chat: ${Configuration.telegram.botChatAlias}`);
     }
@@ -61,11 +59,10 @@ export class CopyingService {
         return thumbnailBuffer;
     }
 
-    private async getVideoPartsAndThumbnailUrls(message: Api.Message): Promise<[string[], string]> {
-        const requestedSignedUrl = message.text?.trim();
-        this.logger.debug(`Received message: ${requestedSignedUrl}`);
+    private async getVideoPartsAndThumbnailUrls(signedLink: string): Promise<[string[], string]> {
+        this.logger.debug(`Received message: ${signedLink}`);
 
-        const { playlists, thumbnail } = await this.loanApiClient.getHlsPlaylistUrls(requestedSignedUrl);
+        const { playlists, thumbnail } = await this.loanApiClient.getHlsPlaylistUrls(signedLink);
         const bestQualityPlaylist = Object.values(playlists).reverse()[0];
         this.logger.debug(`Best quality playlist: ${bestQualityPlaylist}. Thumbnail: ${thumbnail}`);
 
