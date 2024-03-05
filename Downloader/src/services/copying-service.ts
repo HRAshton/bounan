@@ -26,7 +26,7 @@ export class CopyingService {
     }
 
     private async copyVideoToTelegramInternal(signedLink: string): Promise<void> {
-        if (!this.loanApiClient.isSignedUrlValid(signedLink)) {
+        if (!this.loanApiClient.isSignedLinkValid(signedLink)) {
             this.logger.error(`Invalid signed URL: '${signedLink}'`);
             return;
         }
