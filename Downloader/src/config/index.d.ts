@@ -28,6 +28,7 @@
     };
 }
 
-export interface LifetimeConfiguration {
-    session: string;
+export interface LifetimeConfigurationRepository {
+    getSession(): Promise<string | null>;
+    setSession(value: string): Promise<void>;
 }

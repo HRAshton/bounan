@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import { Logger } from 'sitka';
 import { TelegramClient } from './apis/telegram/telegram-client';
-import { lifetimeConfiguration } from './config/lifetime-configuration';
 import { CopyingService } from './services/copying-service';
 import axiosRetry from 'axios-retry';
 import axios from 'axios';
@@ -10,6 +9,9 @@ import { pause } from './utils/promise.utils';
 import { DwnLoanApiClientImpl } from './apis/loan-api';
 import { Configuration } from './config/configuration';
 import { QueueService } from './services/queue-service';
+import { LifetimeConfigurationRepository } from './config/lifetime-configuration';
+import { ParameterStoreClient } from './apis/parameter-store-client/parameter-store-client';
+import { SSMClient } from '@aws-sdk/client-ssm';
 
 axiosRetry(axios, { retries: Configuration.axios.retries });
 
@@ -23,6 +25,9 @@ class Main {
     public async main(): Promise<void> {
         this._logger.info('Starting application...');
 
+        const ssmClient = new SSMClient();
+        const parameterStoreClient = new ParameterStoreClient(ssmClient);
+        const lifetimeConfiguration = new LifetimeConfigurationRepository(parameterStoreClient);
         const smsCodeProvider = new SmsCodeProvider();
         const telegramClient = new TelegramClient(lifetimeConfiguration, smsCodeProvider);
         const loanApiClient = new DwnLoanApiClientImpl();

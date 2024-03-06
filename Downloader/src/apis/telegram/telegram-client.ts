@@ -2,28 +2,30 @@
 import { TelegramClient as GramjsClient } from 'telegram';
 import { Configuration } from '../../config/configuration';
 import { Logger } from 'sitka';
-import { LifetimeConfiguration } from '../../config';
+import { LifetimeConfigurationRepository } from '../../config';
 import { TelegramClient as ITelegramClient } from './interfaces/telegram-client';
 import { SmsCodeProvider } from '../sms-code-api/interfaces/sms-code-provider';
 import { CustomFile } from 'telegram/client/uploads';
 import * as fs from 'fs';
 
 export class TelegramClient implements ITelegramClient {
-    private client: GramjsClient;
+    private client: GramjsClient | undefined;
     private logger: Logger;
 
     constructor(
-        private lifetimeConfiguration: LifetimeConfiguration,
+        private lifetimeConfiguration: LifetimeConfigurationRepository,
         private smsCodeProvider: SmsCodeProvider,
     ) {
-        const { apiId, apiHash } = Configuration.telegram;
-
         this.logger = Logger.getLogger({ name: this.constructor.name });
-        this.client = new GramjsClient(new StringSession(lifetimeConfiguration.session), apiId, apiHash, {});
     }
 
     public async start(): Promise<void> {
         this.logger.info('Starting Telegram client...');
+
+        const { apiId, apiHash } = Configuration.telegram;
+        const session = await this.lifetimeConfiguration.getSession() ?? '';
+
+        this.client = new GramjsClient(new StringSession(session), apiId, apiHash, {});
 
         await this.client.start({
             phoneNumber: Configuration.telegram.phone,
@@ -33,15 +35,20 @@ export class TelegramClient implements ITelegramClient {
 
         this.logger.info('Telegram client started!');
 
-        this.lifetimeConfiguration.session = this.client.session.save() as unknown as string;
+        await this.lifetimeConfiguration.setSession(this.client.session.save() as unknown as string);
     }
 
     public stop(): Promise<void> {
         this.logger.info('Stopping Telegram client...');
-        return this.client.disconnect();
+        return this.client?.disconnect() ?? Promise.resolve();
     }
+
     public async sendVideo(file: string, message: string, thumbnail: Buffer): Promise<void> {
         this.logger.info(`Uploading video to chat ${Configuration.telegram.botChatAlias}`);
+
+        if (this.client?.connected !== true) {
+            throw new Error('Telegram client is not connected');
+        }
 
         const toUpload = new CustomFile(file, fs.statSync(file).size, file);
         const fileResult = await this.client.uploadFile({

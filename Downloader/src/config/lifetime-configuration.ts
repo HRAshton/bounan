@@ -1,34 +1,17 @@
-﻿import * as fs from 'fs';
+﻿import { LifetimeConfigurationRepository as ILifetimeConfigurationRepository } from './index';
+import { ParameterStoreClient } from '../apis/parameter-store-client/interfaces/parameter-store-client';
 
-import { LifetimeConfiguration as ILifetimeConfiguration } from './index';
+export class LifetimeConfigurationRepository implements ILifetimeConfigurationRepository {
+    private readonly PARAMETER_PREFIX = '/bounan/downloader/';
 
-class LifetimeConfiguration implements ILifetimeConfiguration {
-    private SESSION_FILE = 'session.txt';
-
-    public get session(): string {
-        return this.readFromFile(this.SESSION_FILE) || '';
+    constructor(private parameterStoreClient: ParameterStoreClient) {
     }
 
-    public set session(value: string) {
-        this.writeToFile(this.SESSION_FILE, value);
+    public getSession(): Promise<string | null> {
+        return this.parameterStoreClient.getValue(this.PARAMETER_PREFIX + 'session-token');
     }
 
-    private readFromFile(filename: string): string | undefined {
-        if (!fs.existsSync(filename)) {
-            return undefined;
-        }
-
-        return fs.readFileSync(filename, 'utf8');
-    }
-
-    private writeToFile(filename: string, data: string | undefined): void {
-        const actualValue = this.readFromFile(filename);
-        if (actualValue === data) {
-            return;
-        }
-
-        fs.writeFileSync(filename, data || '', 'utf8');
+    public setSession(value: string): Promise<void> {
+        return this.parameterStoreClient.setValue(this.PARAMETER_PREFIX + 'session-token', value, 'SecureString');
     }
 }
-
-export const lifetimeConfiguration = new LifetimeConfiguration();
