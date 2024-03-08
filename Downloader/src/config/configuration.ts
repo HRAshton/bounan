@@ -15,30 +15,30 @@ const getEnv = (name: string, defaultValue?: string): string => {
 
 export const Configuration: IConfiguration = {
     downloading: {
-        maxConcurrentDownloads: parseInt(getEnv('MAX_CONCURRENT_DOWNLOADS', '5')),
+        maxConcurrentDownloads: parseInt(getEnv('DOWNLOADING__MAX_CONCURRENT_DOWNLOADS', '5')),
     },
     processing: {
-        outputFilePath: getEnv('OUTPUT_FILE_PATH', '/tmp/output.mp4'),
+        outputFilePath: getEnv('PROCESSING__OUTPUT_FILE_PATH', '/tmp/output.mp4'),
     },
     telegram: {
-        apiId: parseInt(getEnv('TELEGRAM_API_ID')),
-        apiHash: getEnv('TELEGRAM_API_HASH'),
-        phone: getEnv('TELEGRAM_PHONE_NUMBER'),
-        botChatAlias: getEnv('TELEGRAM_BOT_CHAT_ALIAS'),
+        apiId: parseInt(getEnv('TELEGRAM__API_ID')),
+        apiHash: getEnv('TELEGRAM__API_HASH'),
+        phone: getEnv('TELEGRAM__PHONE'),
+        botChatAlias: getEnv('TELEGRAM__BOT_CHAT_ALIAS'),
 
-        uploadWorkers: parseInt(getEnv('TELEGRAM_UPLOAD_WORKERS', '10')),
+        uploadWorkers: parseInt(getEnv('TELEGRAM__UPLOAD_WORKERS', '10')),
 
         smsCodePooling: {
-            endpoint: getEnv('TELEGRAM_SMS_CODE_POOLING_ENDPOINT'),
-            pollingInterval: parseInt(getEnv('TELEGRAM_SMS_CODE_POLLING_INTERVAL', '5000')),
-            poolingTimeout: parseInt(getEnv('TELEGRAM_SMS_CODE_POOLING_TIMEOUT', '60000')),
+            endpoint: getEnv('TELEGRAM__SMS_CODE_POOLING__ENDPOINT'),
+            pollingInterval: parseInt(getEnv('TELEGRAM__SMS_CODE_POLLING__INTERVAL', '5000')),
+            poolingTimeout: parseInt(getEnv('TELEGRAM__SMS_CODE_POOLING__TIMEOUT', '60000')),
         },
     },
     axios: {
-        retries: parseInt(getEnv('AXIOS_RETRIES', '3')),
+        retries: parseInt(getEnv('AXIOS__RETRIES', '3')),
     },
     sqs: {
-        queueUrl: getEnv('SQS_QUEUE_URL'),
-        waitTimeSeconds: parseInt(getEnv('SQS_WAIT_TIME_SECONDS', '20')),
+        queueUrl: getEnv('SQS__QUEUE_URL'),
+        waitTimeSeconds: parseInt(getEnv('SQS__WAIT_TIME_SECONDS', '20')),
     },
 }

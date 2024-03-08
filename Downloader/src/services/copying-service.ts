@@ -63,7 +63,7 @@ export class CopyingService {
         this.logger.debug(`Received message: ${signedLink}`);
 
         const { playlists, thumbnail } = await this.loanApiClient.getHlsPlaylistUrls(signedLink);
-        const bestQualityPlaylist = Object.values(playlists).reverse()[0];
+        const bestQualityPlaylist  = Object.values(playlists).reverse()[0] as string;
         this.logger.debug(`Best quality playlist: ${bestQualityPlaylist}. Thumbnail: ${thumbnail}`);
 
         const playlistResponse = await axios.get(bestQualityPlaylist);

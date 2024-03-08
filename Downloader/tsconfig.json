@@ -24,7 +24,7 @@
         "declarationMap": false,                  /* Generates a sourcemap for each corresponding '.d.ts' file. */
         // "sourceMap": true,                     /* Generates corresponding '.map' file. */
         // "outFile": "./",                       /* Concatenate and emit output to single file. */
-        "outDir": "dist",
+        "outDir": "./dist/src",
         /* Redirect output structure to the directory. */
         "rootDir": "src",
         /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
@@ -86,8 +86,7 @@
         // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     },
     "include": [
-        "src",
-        "../loan-api/src"
+        "src"
     ],
     "exclude": [
         "node_modules",
