@@ -23,7 +23,7 @@
     "clean:all": "npm run clean && (rm -r ./node_modules || true)",
     "cover": "nyc npm run test",
     "cover:check": "nyc --check-coverage --reporter=lcov npm run test",
-    "lint": "eslint --ext .ts --fix src/**/*.ts test/**/*.ts",
+    "lint": "eslint --ext .ts --fix **/*.ts",
     "prepare": "npm run build",
     "serve": "nodemon ./src/index.ts --exec ts-node --watch null",
     "serve-watch": "nodemon ./src/index.ts",
