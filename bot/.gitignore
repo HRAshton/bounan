@@ -5,5 +5,4 @@ dist/
 node_modules/
 
 # Project files:
-tmp/
-!tmp/.gitkeep
+.env

@@ -5,8 +5,4 @@ dist/
 node_modules/
 
 # Project files:
-tmp/
-!tmp/.gitkeep
-src/apis/loan-api-client.ts
-session.txt
-last-message-id.txt
+.env
